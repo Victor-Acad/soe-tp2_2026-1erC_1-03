@@ -65,9 +65,9 @@ Usar un timeout de `portMAX_DELAY` es equivalente a "esperar por siempre", por l
 
 ---
 
-## ¿Cómo bloquearse en varias Cola?
+## ¿Cómo bloquearse en varias Colas?
 
-Para bloquearse en varias colas o esperar múltiples fuentes de eventos, hay que usar un Queue Set. Por ejemplo:
+Para bloquearse en varias colas o esperar múltiples fuentes de eventos, se debe recurrir a un Queue Set. Por ejemplo:
 
 ```
 QueueSetHandle_t h_queue_set;
