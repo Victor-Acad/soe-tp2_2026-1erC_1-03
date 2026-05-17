@@ -63,7 +63,7 @@ Dado que FreeRTOS se apropia del SysTick, la capa HAL se queda sin su temporizad
 
 # Respuesta de Gemini - Explicación del contenido en: /app
 
-### 1. `app.c` (Inicialización de la Aplicación)
+## 1. `app.c` (Inicialización de la Aplicación)
 Este archivo actúa como el punto de entrada para la configuración del RTOS y la creación de las tareas.
 * **Inicialización de variables:** Configura a cero los contadores globales del sistema (`g_app_tick_cnt`, `g_task_idle_cnt`, `g_app_stack_overflow_cnt`).
 * **Creación de tareas:** Crea dos hilos de ejecución utilizando la API de FreeRTOS `xTaskCreate`:
@@ -71,13 +71,13 @@ Este archivo actúa como el punto de entrada para la configuración del RTOS y l
     * `Task LED`: Encargada de controlar el LED.
 * **Prioridades:** Ambas tareas se crean con la misma prioridad (`tskIDLE_PRIORITY + 1ul`), lo que significa que el planificador de FreeRTOS alternará entre ellas utilizando *Time Slicing* (si está configurado) o cederán el control al bloquearse.
 
-### 2. `freertos.c` (Funciones Hook del SO)
+## 2. `freertos.c` (Funciones Hook del SO)
 Contiene las funciones *Hook* (o callbacks) que FreeRTOS llama automáticamente bajo ciertas condiciones del sistema.
 * **`vApplicationIdleHook`:** Se ejecuta cuando el sistema operativo está inactivo (no hay tareas de mayor prioridad listas para ejecutarse). Aquí se incrementa el contador `g_task_idle_cnt`, lo cual es útil para medir la carga de la CPU.
 * **`vApplicationTickHook`:** Se ejecuta en cada interrupción del "Tick" del RTOS (típicamente cada 1 ms). Incrementa el contador global de la aplicación `g_app_tick_cnt`.
 * **`vApplicationStackOverflowHook`:** Una medida de seguridad crítica. Si el RTOS detecta que una tarea ha excedido el espacio de memoria de su pila (stack), esta función detiene la ejecución del sistema (`configASSERT(0)`) dentro de una sección crítica para facilitar la depuración.
 
-### 3. `task_btn.c` (Lectura y Anti-rebote del Botón)
+## 3. `task_btn.c` (Lectura y Anti-rebote del Botón)
 Implementa la tarea que monitorea el botón de hardware utilizando una máquina de estados para evitar lecturas erróneas por ruido eléctrico (rebotes).
 * **Ejecución periódica:** La tarea se ejecuta en un bucle infinito cada 50 ms utilizando `vTaskDelay(BTN_TICK_DEL_MAX)`.
 * **Máquina de estados (`task_btn_statechart`):** Tiene 4 estados principales:
@@ -86,14 +86,14 @@ Implementa la tarea que monitorea el botón de hardware utilizando una máquina 
     * **`ST_BTN_DOWN`:** El botón está firmemente presionado. Si detecta que se suelta, pasa a evaluar la subida.
     * **`ST_BTN_RISING`:** Espera 50 ms para el anti-rebote de liberación. Si se confirma, envía el evento de apagado (`EV_LED_OFF`) a la tarea del LED y vuelve al reposo.
 
-### 4. `task_led.c` (Control del LED)
+## 4. `task_led.c` (Control del LED)
 Implementa la tarea que controla el hardware del LED, reaccionando a los eventos generados por la tarea del botón.
 * **Ejecución determinista:** A diferencia del botón, esta tarea usa `vTaskDelayUntil` para garantizar que la ejecución se dé *exactamente* cada 50 ms, independientemente del tiempo que tarde en procesarse el código interno.
 * **Máquina de estados (`task_led_statechart`):**
     * **`ST_LED_OFF`:** Mantiene el LED apagado. Si recibe el evento `EV_LED_BLINK` y la bandera (`flag`) está activa, enciende el LED, reinicia el contador de tiempo, y pasa al estado de parpadeo.
     * **`ST_LED_BLINK`:** Si recibe el evento `EV_LED_OFF`, vuelve al estado apagado. De lo contrario, verifica si han pasado 500 ms (`DEL_LED_MAX`). Cada vez que se cumple este intervalo, invierte el estado del pin del LED (Toggle), creando un efecto de intermitencia.
 
-### 5. `task_led_interface.c` (Comunicación Inter-Tareas)
+## 5. `task_led_interface.c` (Comunicación Inter-Tareas)
 Provee una interfaz simple para que la tarea del botón pueda enviar comandos a la tarea del LED.
 * **Función `put_event_task_led`:** Modifica directamente la estructura de datos de la tarea del LED (`task_led_dta`), estableciendo el nuevo evento (`EV_LED_BLINK` o `EV_LED_OFF`) y levantando la bandera de nuevo evento (`flag = true`).
 * *Nota de diseño:* Este método utiliza memoria compartida (variables globales/externas) en lugar de primitivas de FreeRTOS como Colas (Queues) o Semáforos. Es funcional aquí porque el intercambio de datos es simple, pero en sistemas más complejos podría generar condiciones de carrera (Race Conditions).
