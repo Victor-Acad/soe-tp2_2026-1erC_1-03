@@ -50,8 +50,7 @@ Esto crea dos categorías de interrupciones:
 
 ---
 
-## Cambios y comportamiento observado: 
-# Observaciones de la Implementación - Paso 03
+## Implementación y comportamiento observado: 
 
 Se modificó la gestión del botón pasando de un esquema de consulta continua a un mecanismo eficiente **guiado por interrupciones** mediante el callback `HAL_GPIO_EXTI_Callback`. Al presionarse o liberarse el botón `B1_Pin`, la rutina de servicio de interrupción (ISR) detecta el flanco y evalúa su estado actual; según corresponda, libera (`xSemaphoreGiveFromISR`) el semáforo binario `h_btn_led_off_bin_sem` o `h_btn_led_blink_bin_sem`. 
 
