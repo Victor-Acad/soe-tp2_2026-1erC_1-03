@@ -1,2 +1,3 @@
 ../app/src/task_btn.c:76:6:task_btn	32	static
 ../app/src/task_btn.c:96:6:task_btn_statechart	16	static
+../app/src/task_btn.c:180:6:HAL_GPIO_EXTI_Callback	24	static,ignoring_inline_asm

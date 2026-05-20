@@ -127,7 +127,6 @@ void task_btn_statechart(void)
 					/* Print out: Task execution */
 					LOGGER_INFO(" %s - BTN PRESSED", pcTaskGetName(NULL));
 
-					put_event_task_led(EV_LED_BLINK);
 					task_btn_dta.state = ST_BTN_DOWN;
 				}
 				else
@@ -157,7 +156,6 @@ void task_btn_statechart(void)
 					/* Print out: Task execution */
 					LOGGER_INFO(" %s - BTN HOVER", pcTaskGetName(NULL));
 
-					put_event_task_led(EV_LED_OFF);
 					task_btn_dta.state = ST_BTN_UP;
 				}
 				else
@@ -177,6 +175,33 @@ void task_btn_statechart(void)
 			break;
 	}
 
+}
+
+/* GPIO Interrupt Callbacks */
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == B1_Pin)
+	{
+		GPIO_PinState state;
+
+		state = HAL_GPIO_ReadPin(GPIOC, B1_Pin);
+
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+		if(state == GPIO_PIN_SET)
+		{
+			/* Libera (signal) el semáforo para apagar el led desde la ISR. */
+			xSemaphoreGiveFromISR(h_btn_led_off_bin_sem, &xHigherPriorityTaskWoken);
+		}
+		else
+		{
+			/* Libera (signal) el semáforo para parpadear el led desde la ISR. */
+			xSemaphoreGiveFromISR(h_btn_led_blink_bin_sem, &xHigherPriorityTaskWoken);
+		}
+
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
 }
 
 /********************** end of file ******************************************/
