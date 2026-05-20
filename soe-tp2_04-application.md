@@ -47,3 +47,13 @@ Esto crea dos categorías de interrupciones:
     * Pueden anidarse entre ellas.
     * **Sí** tienen permitido utilizar llamadas a la API que terminan en `...FromISR`.
     * Pueden experimentar un ligero retraso de microsegundos porque FreeRTOS deshabilita temporalmente este grupo de interrupciones mientras ejecuta sus propias secciones críticas (como actualizar la lista de tareas listas).
+
+---
+
+## Cambios y comportamiento observado: 
+# Observaciones de la Implementación - Paso 03
+
+Se modificó la gestión del botón pasando de un esquema de consulta continua a un mecanismo eficiente **guiado por interrupciones** mediante el callback `HAL_GPIO_EXTI_Callback`. Al presionarse o liberarse el botón `B1_Pin`, la rutina de servicio de interrupción (ISR) detecta el flanco y evalúa su estado actual; según corresponda, libera (`xSemaphoreGiveFromISR`) el semáforo binario `h_btn_led_off_bin_sem` o `h_btn_led_blink_bin_sem`. 
+
+Este cambio optimiza el uso del procesador, ya que `task_btn` deja de consumir recursos en bucles de espera y pasa a estar en **estado bloqueado (eficiente)**, despertándose de forma inmediata solo cuando la ISR entrega el semáforo mediante `portYIELD_FROM_ISR` si una tarea de mayor prioridad lo requiere.
+
