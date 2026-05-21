@@ -102,12 +102,13 @@ void task_led_statechart(void)
 	{
 		case ST_LED_OFF:
 
-			if ((true == task_led_dta.flag) && (EV_LED_BLINK == task_led_dta.event))
+			/* Intenta tomar el semáforo binario para parpadear, bloqueándose
+			 * hasta que se ponga en verde. */
+			if (xSemaphoreTake(h_btn_led_blink_bin_sem, portMAX_DELAY) == pdTRUE)
 			{
 				/* Print out: Task execution */
 				LOGGER_INFO(" %s - LED BLINK", pcTaskGetName(NULL));
 
-				task_led_dta.flag = false;
 				task_led_dta.tick = xTaskGetTickCount();
 				task_led_dta.state = ST_LED_BLINK;
 				HAL_GPIO_WritePin(task_led_dta.gpio_port, task_led_dta.pin, LED_ON);
@@ -117,12 +118,12 @@ void task_led_statechart(void)
 
 		case ST_LED_BLINK:
 
-			if ((true == task_led_dta.flag) && (EV_LED_OFF == task_led_dta.event))
+			/* Intenta tomar el semáforo binario para parpadear, sin bloquearse. */
+			if (xSemaphoreTake(h_btn_led_off_bin_sem, 0) == pdTRUE)
 			{
 				/* Print out: Task execution */
 				LOGGER_INFO(" %s - LED OFF", pcTaskGetName(NULL));
 
-				task_led_dta.flag = false;
 				task_led_dta.state = ST_LED_OFF;
 				HAL_GPIO_WritePin(task_led_dta.gpio_port, task_led_dta.pin, LED_OFF);
 			}

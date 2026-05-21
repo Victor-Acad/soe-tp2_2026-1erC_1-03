@@ -1,2 +1,3 @@
 ../app/src/task_btn.c:76:6:task_btn	1
 ../app/src/task_btn.c:96:6:task_btn_statechart	12
+../app/src/task_btn.c:180:6:HAL_GPIO_EXTI_Callback	4

@@ -68,6 +68,8 @@ uint32_t g_app_stack_overflow_cnt;
 /* Declare a variable of type xSemaphoreHandle (binary or counting) or mutex. 
  * This is used to reference the semaphore that is used to synchronize a thread
  * with other thread or to ensure mutual exclusive access to...*/
+SemaphoreHandle_t h_btn_led_blink_bin_sem;
+SemaphoreHandle_t h_btn_led_off_bin_sem;
 
 /* Declare a variable of type TaskHandle_t. This is used to reference threads. */
 TaskHandle_t h_task_btn;
@@ -87,13 +89,18 @@ void app_init(void)
 	LOGGER_INFO(" RTOS - Event-Triggered Systems (ETS)");
 	LOGGER_INFO(" soe-tp0_03-application: Demo Code");
 
-    /* Before a queue or semaphore (binary or counting) or mutex is used it must 
-     * be explicitly created */
+    /* Binary semaphores creation and success checks. */
+	h_btn_led_blink_bin_sem = xSemaphoreCreateBinary();
 
-    /* Check the queue or semaphore (binary or counting) or mutex was created 
-     * successfully. */
+	configASSERT(h_btn_led_blink_bin_sem != NULL);
+
+	h_btn_led_off_bin_sem = xSemaphoreCreateBinary();
+
+	configASSERT(h_btn_led_off_bin_sem != NULL);
 
     /* Add queue or semaphore (binary or counting) or mutex to registry. */
+	vQueueAddToRegistry(h_btn_led_blink_bin_sem, "BTN to LED (blink) binary semaphore.");
+	vQueueAddToRegistry(h_btn_led_off_bin_sem, "BTN to LED (off) binary semaphore.");
 
 	/* Add threads, ... */
     BaseType_t ret;
