@@ -106,15 +106,16 @@ void app_init(void)
     BaseType_t ret;
 
     /* Task BTN thread at priority 1 */
-    ret = xTaskCreate(task_btn,							/* Pointer to the function thats implement the task. */
-					  "Task BTN",						/* Text name for the task. This is to facilitate debugging only. */
-					  (2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. */
-					  NULL,								/* We are not using the task parameter. */
-					  (tskIDLE_PRIORITY + 1ul),			/* This task will run at priority 1. */
-					  &h_task_btn);						/* We are using a variable as task handle. */
+    /* No creamos la tarea del botón. */
+    //ret = xTaskCreate(task_btn,							/* Pointer to the function thats implement the task. */
+	//				  "Task BTN",						/* Text name for the task. This is to facilitate debugging only. */
+	//				  (2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. */
+	//				  NULL,								/* We are not using the task parameter. */
+	//				  (tskIDLE_PRIORITY + 1ul),			/* This task will run at priority 1. */
+	//				  &h_task_btn);						/* We are using a variable as task handle. */
 
     /* Check the thread was created successfully. */
-    configASSERT(pdPASS == ret);
+    //configASSERT(pdPASS == ret);
 
     /* Task LED thread at priority 1 */
     ret = xTaskCreate(task_led,							/* Pointer to the function thats implement the task. */
